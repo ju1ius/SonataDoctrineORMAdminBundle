@@ -8,90 +8,79 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 #}
+
 {% if not sonata_admin.field_description.hasassociationadmin %}
     {% for element in value %}
         {{ element|render_relation_element(sonata_admin.field_description) }}
     {% endfor %}
 {% else %}
 
+    {% set sortable = sonata_admin.field_description.isSortable %}
+    {% set sortable_property = sortable ? sonata_admin.field_description.options.sortable : '' %}
+
     <div id="field_container_{{ id }}" class="field-container">
-        <span id="field_widget_{{ id }}" >
+        <div id="field_widget_{{ id }}">
             {% if sonata_admin.edit == 'inline' %}
-                {% if sonata_admin.inline == 'table' %}
-                    {% if form.children|length > 0 %}
-                        {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_to_many_inline_table.html.twig' %}
-                    {% endif %}
+                {% if sonata_admin.inline == 'table' and form.children|length > 0 %}
+                    {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_to_many_inline_table.html.twig' %}
                 {% elseif form.children|length > 0 %}
                     {% set associationAdmin = sonata_admin.field_description.associationadmin %}
                     {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_to_many_inline_tabs.html.twig' %}
-
                 {% endif %}
             {% else %}
                 {{ form_widget(form) }}
             {% endif %}
+        </div>
 
-        </span>
+        {% set json_field_description = sonata_field_description_json()|raw %}
 
-        {% set display_create_button = sonata_admin.field_description.associationadmin.hasroute('create')
+        {% set display_create_button = (
+            sonata_admin.field_description.associationadmin.hasroute('create')
             and sonata_admin.field_description.associationadmin.isGranted('CREATE')
             and btn_add
             and (
                 sonata_admin.field_description.options.limit is not defined or
                 form.children|length < sonata_admin.field_description.options.limit
-            ) %}
+            )
+        ) %}
 
         {% if sonata_admin.edit == 'inline' %}
 
             {% if display_create_button %}
-                <span id="field_actions_{{ id }}" >
-                    <a
-                        href="{{ sonata_admin.field_description.associationadmin.generateUrl(
-                            'create',
-                            sonata_admin.field_description.getOption('link_parameters', {})
-                        ) }}"
-                        onclick="return start_field_retrieve_{{ id }}(this);"
+                <span id="field_actions_{{ id }}">
+                    <a href="{{ sonata_admin.field_description.associationadmin.generateUrl(
+                        'create',
+                        sonata_admin.field_description.getOption('link_parameters', {})
+                    ) }}"
                         class="btn btn-success btn-sm sonata-ba-action"
+                        data-field-action="append-form-element"
+                        data-field-description="{{ json_field_description }}"
                         title="{{ btn_add|trans({}, btn_catalogue) }}"
                     >
                         <i class="fa fa-plus-circle"></i>
-                        {{ btn_add|trans({}, btn_catalogue) }}
+                        <span>{{ btn_add|trans({}, btn_catalogue) }}</span>
                     </a>
                 </span>
             {% endif %}
-
-            {# add code for the sortable options #}
-            {% if sonata_admin.field_description.options.sortable is defined %}
-                {% if sonata_admin.inline == 'table' %}
-                    {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_to_many_sortable_script_table.html.twig' %}
-                {% else %}
-                    {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_to_many_sortable_script_tabs.html.twig' %}
-                {% endif %}
-            {% endif %}
-
-            {# include association code #}
-            {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_association_script.html.twig' %}
-
         {% else %}
-            <span id="field_actions_{{ id }}" >
+
+            <span id="field_actions_{{ id }}">
                 {% if display_create_button %}
-                    <a
-                        href="{{ sonata_admin.field_description.associationadmin.generateUrl(
-                            'create',
-                            sonata_admin.field_description.getOption('link_parameters', {})
-                        ) }}"
-                        onclick="return start_field_dialog_form_add_{{ id }}(this);"
+                    <a href="{{ sonata_admin.field_description.associationadmin.generateUrl(
+                        'create',
+                        sonata_admin.field_description.getOption('link_parameters', {})
+                    ) }}"
                         class="btn btn-success btn-sm sonata-ba-action"
+                        data-field-action="create-association"
+                        data-field-description="{{ json_field_description }}"
                         title="{{ btn_add|trans({}, btn_catalogue) }}"
                     >
                         <i class="fa fa-plus-circle"></i>
-                        {{ btn_add|trans({}, btn_catalogue) }}
+                        <span>{{ btn_add|trans({}, btn_catalogue) }}</span>
                     </a>
                 {% endif %}
             </span>
 
-            {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_modal.html.twig' %}
-
-            {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_many_association_script.html.twig' %}
         {% endif %}
     </div>
 {% endif %}

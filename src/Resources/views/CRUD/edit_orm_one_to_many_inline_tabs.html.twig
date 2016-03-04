@@ -8,41 +8,50 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 #}
-<div class="sonata-ba-tabs">
+<div class="{{ classlist('sonata-ba-tabs', {'sonata-ba-sortable': sortable}) }}">
     {% for nested_group_field in form.children %}
         <div>
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
                     {% for name, form_group in associationAdmin.formgroups %}
-                        <li class="{% if loop.first %}active{% endif %}">
-                            <a
-                                href="#{{ associationAdmin.uniqid }}_{{ loop.parent.loop.index }}_{{ loop.index }}"
-                                data-toggle="tab"
+                        <li class="{{ classlist({active: loop.first}) }}">
+                            <a href="#{{ associationAdmin.uniqid }}_{{ loop.parent.loop.index }}_{{ loop.index }}"
+                               data-toggle="tab"
                             >
-                                <i class="icon-exclamation-sign has-errors hide"></i>
+                                <i class="fa fa-exclamation-circle">&nbsp;</i>
                                 {{ associationAdmin.trans(name, {}, form_group.translation_domain) }}
                             </a>
                         </li>
                     {% endfor %}
+                    {% if sortable %}
+                        <li class="sonata-ba-sortable-handler pull-right"></li>
+                    {% endif %}
                 </ul>
 
                 <div class="tab-content">
                     {% for name, form_group in associationAdmin.formgroups %}
-                        <div
-                            class="tab-pane {% if loop.first %}active{% endif %}"
-                            id="{{ associationAdmin.uniqid }}_{{ loop.parent.loop.index }}_{{ loop.index }}"
+                        <div class="{{ classlist(
+                            'tab-pane', 'fade',
+                            {active: loop.first, 'in': loop.first}
+                        ) }}"
+                             id="{{ associationAdmin.uniqid }}_{{ loop.parent.loop.index }}_{{ loop.index }}"
                         >
                             <fieldset>
                                 <div class="sonata-ba-collapsed-fields">
                                     {% for field_name in form_group.fields if nested_group_field.children[field_name] is defined %}
                                         {% set nested_field = nested_group_field.children[field_name] %}
-                                        <div class="sonata-ba-field-{{ id }}-{{ field_name }}">
+                                        <div class="{{ classlist(
+                                            "sonata-ba-field-#{id}-#{field_name}",
+                                            {
+                                                'sonata-ba-sortable-position': field_name == sortable_property
+                                            }
+                                        ) }}">
                                             {% if associationAdmin.formfielddescriptions[field_name] is defined %}
                                                 {{ form_row(nested_field, {
-                                                    'inline': 'natural',
-                                                    'edit'  : 'inline'
+                                                    inline: 'natural',
+                                                    edit: 'inline'
                                                 }) }}
-                                                {% set dummy = nested_group_field.setrendered %}
+                                                {% do nested_group_field.setrendered %}
                                             {% else %}
                                                 {{ form_row(nested_field) }}
                                             {% endif %}

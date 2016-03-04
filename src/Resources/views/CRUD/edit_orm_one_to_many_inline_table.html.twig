@@ -8,46 +8,46 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 
 #}
-<table class="table table-bordered">
-    <thead>
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
         <tr>
             {% for field_name, nested_field in form.children|first.children %}
                 {% if field_name == '_delete' %}
                     <th>{{ 'action_delete'|trans({}, 'SonataAdminBundle') }}</th>
                 {% else %}
-                    <th
-                        {% if nested_field.vars['required'] %}
-                            class="required"
-                        {% endif %}
-                        {% if (nested_field.vars['attr']['hidden'] is defined) and (nested_field.vars['attr']['hidden']) %}
-                            style="display:none;"
-                        {% endif %}
-                    >
-                        {{ nested_field.vars.label|trans({}, nested_field.vars['sonata_admin'].admin.translationDomain
-                            |default(nested_field.vars.translation_domain)
+                    <th class="{{ classlist({
+                        required: nested_field.vars['required'],
+                        hidden: nested_field.vars['attr']['hidden']|default(false)
+                    }) }}">
+                        {{ nested_field.vars.label|trans(
+                            {},
+                            nested_field.vars['sonata_admin'].admin.translationDomain|default(nested_field.vars.translation_domain)
                         ) }}
                     </th>
                 {% endif %}
             {% endfor %}
         </tr>
-    </thead>
-    <tbody class="sonata-ba-tbody">
+        </thead>
+        <tbody class="{{ classlist('sonata-ba-tbody', {'sonata-ba-sortable': sortable}) }}">
         {% for nested_group_field_name, nested_group_field in form.children %}
             <tr>
                 {% for field_name, nested_field in nested_group_field.children %}
-                    <td class="
-                        sonata-ba-td-{{ id }}-{{ field_name  }}
-                        control-group
-                        {% if nested_field.vars.errors|length > 0 %} error sonata-ba-field-error{% endif %}
-                        "
-                        {% if (nested_field.vars['attr']['hidden'] is defined) and (nested_field.vars['attr']['hidden']) %}
-                            style="display:none;"
-                        {% endif %}
-                    >
+                    {% set _has_error = nested_field.vars.errors|length > 0 %}
+                    <td class="{{ classlist(
+                        "sonata-ba-td-#{id}-#{field_name}",
+                        'form-group',
+                        {
+                            'has-error': _has_error,
+                            'sonata-ba-field-error': _has_error,
+                            'sonata-ba-sortable-handler': field_name == sortable_property,
+                            'sonata-ba-sortable-position': field_name == sortable_property,
+                            hidden: nested_field.vars['attr']['hidden']|default(false)
+                        }
+                    ) }}">
                         {% if sonata_admin.field_description.associationadmin.formfielddescriptions[field_name] is defined %}
                             {{ form_widget(nested_field) }}
-
-                            {% set dummy = nested_group_field.setrendered %}
+                            {% do nested_group_field.setRendered %}
                         {% else %}
                             {% if field_name == '_delete' %}
                                 {{ form_widget(nested_field, { label: false }) }}
@@ -55,8 +55,8 @@ file that was distributed with this source code.
                                 {{ form_widget(nested_field) }}
                             {% endif %}
                         {% endif %}
-                        {% if nested_field.vars.errors|length > 0 %}
-                            <div class="help-inline sonata-ba-field-error-messages">
+                        {% if _has_error %}
+                            <div class="help-block sonata-ba-field-error-messages">
                                 {{ form_errors(nested_field) }}
                             </div>
                         {% endif %}
@@ -64,5 +64,6 @@ file that was distributed with this source code.
                 {% endfor %}
             </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

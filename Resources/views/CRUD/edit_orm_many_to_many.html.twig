@@ -10,7 +10,7 @@ file that was distributed with this source code.
 #}
 {% if sonata_admin.field_description.hasassociationadmin %}
     <div id="field_container_{{ id }}" class="field-container">
-        <span id="field_widget_{{ id }}" >
+        <span id="field_widget_{{ id }}">
             {% if sonata_admin.edit == 'inline' %}
                 {% if sonata_admin.inline == 'table' %}
                     {% if form.children|length > 0 %}
@@ -79,28 +79,33 @@ file that was distributed with this source code.
 
         </span>
 
+        {# get the JSON data for the action buttons #}
+        {% set json_field_description = sonata_field_description_json() %}
+
         {% if sonata_admin.edit == 'inline' %}
 
             {% if sonata_admin.field_description.associationadmin.hasroute('create') and sonata_admin.field_description.associationadmin.isGranted('CREATE') and btn_add %}
-                <span id="field_actions_{{ id }}" >
+                <span id="field_actions_{{ id }}">
                     <a
                         href="{{ sonata_admin.field_description.associationadmin.generateUrl('create', sonata_admin.field_description.getOption('link_parameters', {})) }}"
-                        onclick="return start_field_retrieve_{{ id }}(this);"
                         class="btn btn-success btn-sm sonata-ba-action"
+                        data-field-action="append-form-element"
+                        data-field-description="{{ json_field_description }}"
                         title="{{ btn_add|trans({}, btn_catalogue) }}"
-                        >
+                    >
                         <i class="fa fa-plus-circle"></i>
                         {{ btn_add|trans({}, btn_catalogue) }}
                     </a>
                 </span>
             {% endif %}
 
-            {# include association code #}
+            {# Kept for backwards compatibility, will be removed in 3.0.#}
             {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_one_association_script.html.twig' %}
 
         {% else %}
+
             <div id="field_container_{{ id }}" class="field-container">
-                <span id="field_widget_{{ id }}" >
+                <span id="field_widget_{{ id }}">
                     {{ form_widget(form) }}
                 </span>
 
@@ -108,20 +113,25 @@ file that was distributed with this source code.
                     {% if sonata_admin.field_description.associationadmin.hasRoute('create') and sonata_admin.field_description.associationadmin.isGranted('CREATE') and btn_add %}
                         <a
                             href="{{ sonata_admin.field_description.associationadmin.generateUrl('create', sonata_admin.field_description.getOption('link_parameters', {})) }}"
-                            onclick="return start_field_dialog_form_add_{{ id }}(this);"
                             class="btn btn-success btn-sm sonata-ba-action"
+                            data-field-action="create-association"
+                            data-field-description="{{ json_field_description }}"
                             title="{{ btn_add|trans({}, btn_catalogue) }}"
-                            >
+                        >
                             <i class="fa fa-plus-circle"></i>
                             {{ btn_add|trans({}, btn_catalogue) }}
                         </a>
                     {% endif %}
                 </span>
 
+                {# Kept for backwards compatibility, will be removed in 3.0.#}
                 {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_modal.html.twig' %}
+
             </div>
 
+            {# Kept for backwards compatibility, will be removed in 3.0.#}
             {% include 'SonataDoctrineORMAdminBundle:CRUD:edit_orm_many_association_script.html.twig' %}
+
         {% endif %}
     </div>
 {% endif %}
